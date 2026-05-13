@@ -11,7 +11,6 @@ const MovieCard = ({ movie, darkMode, deleteMovie, openEditModal }) => {
     >
       <img
         src={
-          movie.poster_path
           movie.poster_path?.startsWith("http")
             ? movie.poster_path
             : `https://image.tmdb.org/t/p/w500${movie.poster_path}`
