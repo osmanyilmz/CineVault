@@ -1,26 +1,24 @@
 import React, { useEffect, useState } from "react";
 
 import Navbar from "../components/Navbar";
-import MovieCard from "../components/MovieCard";
 import SearchBar from "../components/SearchBar";
+import MovieForm from "../components/MovieForm";
+import MovieCard from "../components/MovieCard";
 
 import { getMovies, searchMovies } from "../services/api";
 
 const Home = () => {
   const [movies, setMovies] = useState([]);
-
   const [search, setSearch] = useState("");
-
   const [darkMode, setDarkMode] = useState(true);
+  const [editingMovie, setEditingMovie] = useState(null);
+  const [showModal, setShowModal] = useState(false);
 
   useEffect(() => {
     fetchMovies();
 
-    const savedTheme = localStorage.getItem("theme");
-
-    if (savedTheme !== null) {
-      setDarkMode(JSON.parse(savedTheme));
-    }
+    const saved = localStorage.getItem("theme");
+    if (saved !== null) setDarkMode(JSON.parse(saved));
   }, []);
 
   useEffect(() => {
@@ -28,50 +26,95 @@ const Home = () => {
   }, [darkMode]);
 
   const fetchMovies = async () => {
-    const response = await getMovies();
-
-    setMovies(response.data.results);
+    const res = await getMovies();
+    setMovies(res.data.results);
   };
 
   const handleSearch = async (e) => {
     const value = e.target.value;
-
     setSearch(value);
 
     if (value.trim() === "") {
       fetchMovies();
     } else {
-      const response = await searchMovies(value);
-
-      setMovies(response.data.results);
+      const res = await searchMovies(value);
+      setMovies(res.data.results);
     }
+  };
+
+  const addMovie = (movie) => {
+    setMovies([{ ...movie, id: Date.now() }, ...movies]);
+    setShowModal(false);
+  };
+
+  const deleteMovie = (id) => {
+    setMovies(movies.filter((m) => m.id !== id));
+  };
+
+  const updateMovie = (movie) => {
+    setMovies(movies.map((m) => (m.id === movie.id ? movie : m)));
+    setEditingMovie(null);
+    setShowModal(false);
+  };
+
+  const openAddModal = () => {
+    setEditingMovie(null);
+    setShowModal(true);
+  };
+
+  const openEditModal = (movie) => {
+    setEditingMovie(movie);
+    setShowModal(true);
   };
 
   return (
     <div
       className={
         darkMode
-          ? "min-h-screen bg-[#0F172A] duration-300"
-          : "min-h-screen bg-gray-100 duration-300"
+          ? "min-h-screen bg-[#0F172A] text-white"
+          : "min-h-screen bg-gray-100 text-black"
       }
     >
       <Navbar darkMode={darkMode} setDarkMode={setDarkMode} />
 
       <div className="p-6">
-        <div className="mb-6">
+        <div className="flex gap-3 mb-6">
           <SearchBar
             search={search}
             handleSearch={handleSearch}
             darkMode={darkMode}
           />
+
+          <button
+            onClick={openAddModal}
+            className="bg-purple-600 px-5 py-3 rounded-xl text-white hover:bg-purple-700"
+          >
+            Add Movie
+          </button>
         </div>
 
         <div className="grid md:grid-cols-4 gap-6">
           {movies.map((movie) => (
-            <MovieCard key={movie.id} movie={movie} darkMode={darkMode} />
+            <MovieCard
+              key={movie.id}
+              movie={movie}
+              darkMode={darkMode}
+              deleteMovie={deleteMovie}
+              openEditModal={openEditModal}
+            />
           ))}
         </div>
       </div>
+
+      {showModal && (
+        <MovieForm
+          addMovie={addMovie}
+          updateMovie={updateMovie}
+          editingMovie={editingMovie}
+          darkMode={darkMode}
+          setShowModal={setShowModal}
+        />
+      )}
     </div>
   );
 };

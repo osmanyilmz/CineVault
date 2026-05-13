@@ -1,81 +1,97 @@
-import React, { useEffect, useState } from "react";
+import { useEffect, useState } from "react";
 
-const MovieForm = ({ addMovie, selectedMovie, updateMovie, darkMode }) => {
-  const [formData, setFormData] = useState({
-    name: "",
-    email: "",
-  });
+const MovieForm = ({
+  addMovie,
+  updateMovie,
+  editingMovie,
+  darkMode,
+  setShowModal,
+}) => {
+  const [title, setTitle] = useState("");
+  const [overview, setOverview] = useState("");
+  const [poster, setPoster] = useState("");
 
   useEffect(() => {
-    if (selectedMovie) {
-      setFormData(selectedMovie);
+    if (editingMovie) {
+      setTitle(editingMovie.title || "");
+      setOverview(editingMovie.overview || "");
+      setPoster(editingMovie.poster_path || "");
+    } else {
+      setTitle("");
+      setOverview("");
+      setPoster("");
     }
-  }, [selectedMovie]);
+  }, [editingMovie]);
 
   const handleSubmit = (e) => {
     e.preventDefault();
 
-    if (selectedMovie) {
-      updateMovie(selectedMovie.id, formData);
+    const movie = {
+      id: editingMovie ? editingMovie.id : Date.now(),
+      title,
+      overview,
+      poster_path: poster,
+      vote_average: editingMovie?.vote_average || 8.0,
+      release_date: editingMovie?.release_date || "2026",
+    };
+
+    if (editingMovie) {
+      updateMovie(movie);
     } else {
-      addMovie(formData);
+      addMovie(movie);
     }
 
-    setFormData({
-      name: "",
-      email: "",
-    });
+    setShowModal(false);
   };
 
   return (
-    <form
-      onSubmit={handleSubmit}
-      className={
-        darkMode
-          ? "bg-[#1E293B] p-5 rounded-2xl mb-6"
-          : "bg-white p-5 rounded-2xl mb-6 shadow-lg"
-      }
-    >
-      <div className="grid md:grid-cols-2 gap-4">
+    <div className="fixed inset-0 bg-black/70 flex items-center justify-center">
+      <form
+        onSubmit={handleSubmit}
+        className={
+          darkMode
+            ? "bg-[#1E293B] p-6 rounded-xl w-[500px]"
+            : "bg-white p-6 rounded-xl w-[500px]"
+        }
+      >
+        <h2 className="text-xl font-bold mb-4">
+          {editingMovie ? "Update Movie" : "Add Movie"}
+        </h2>
+
         <input
-          type="text"
-          placeholder="Movie Name"
-          className={
-            darkMode
-              ? "p-3 rounded-xl bg-[#111827] text-white"
-              : "p-3 rounded-xl bg-gray-100 text-black border"
-          }
-          value={formData.name}
-          onChange={(e) =>
-            setFormData({
-              ...formData,
-              name: e.target.value,
-            })
-          }
+          className="w-full p-2 mb-3 border rounded"
+          placeholder="Title"
+          value={title}
+          onChange={(e) => setTitle(e.target.value)}
         />
 
         <input
-          type="text"
-          placeholder="Movie Description"
-          className={
-            darkMode
-              ? "p-3 rounded-xl bg-[#111827] text-white"
-              : "p-3 rounded-xl bg-gray-100 text-black border"
-          }
-          value={formData.email}
-          onChange={(e) =>
-            setFormData({
-              ...formData,
-              email: e.target.value,
-            })
-          }
+          className="w-full p-2 mb-3 border rounded"
+          placeholder="Poster URL"
+          value={poster}
+          onChange={(e) => setPoster(e.target.value)}
         />
-      </div>
 
-      <button className="mt-5 bg-purple-600 px-5 py-3 rounded-xl text-white hover:bg-purple-700 duration-300">
-        {selectedMovie ? "Update Movie" : "Add Movie"}
-      </button>
-    </form>
+        <textarea
+          className="w-full p-2 mb-3 border rounded"
+          placeholder="Overview"
+          value={overview}
+          onChange={(e) => setOverview(e.target.value)}
+        />
+
+        <button className="bg-purple-600 text-white w-full py-2 rounded">
+          {editingMovie ? "Update" : "Add"}
+        </button>
+
+        <button
+          type="button"
+          onClick={() => setShowModal(false)}
+          className="w-full mt-2 text-red-500"
+        >
+          Close
+        </button>
+      </form>
+    </div>
   );
 };
 

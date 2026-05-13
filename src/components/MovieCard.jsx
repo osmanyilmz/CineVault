@@ -1,8 +1,6 @@
-import React from "react";
+import { FaTrash, FaEdit, FaStar } from "react-icons/fa";
 
-import { FaStar } from "react-icons/fa";
-
-const MovieCard = ({ movie, darkMode }) => {
+const MovieCard = ({ movie, darkMode, deleteMovie, openEditModal }) => {
   return (
     <div
       className={
@@ -14,44 +12,40 @@ const MovieCard = ({ movie, darkMode }) => {
       <img
         src={
           movie.poster_path
-            ? `https://image.tmdb.org/t/p/w500${movie.poster_path}`
-            : "https://via.placeholder.com/500x750"
+          movie.poster_path?.startsWith("http")
+            ? movie.poster_path
+            : `https://image.tmdb.org/t/p/w500${movie.poster_path}`
         }
-        alt={movie.title}
-        className="w-full h-[500px] object-cover"
+        className="h-[400px] w-full object-cover"
       />
 
-      <div className="p-5">
-        <h2
-          className={
-            darkMode
-              ? "text-2xl font-bold text-white"
-              : "text-2xl font-bold text-black"
-          }
-        >
-          {movie.title}
-        </h2>
+      <div className="p-4">
+        <h2 className="text-xl font-bold">{movie.title}</h2>
 
-        <p
-          className={
-            darkMode
-              ? "text-gray-400 mt-2 line-clamp-3"
-              : "text-gray-600 mt-2 line-clamp-3"
-          }
-        >
-          {movie.overview}
-        </p>
+        <p className="text-sm opacity-70 line-clamp-3">{movie.overview}</p>
 
-        <div className="flex justify-between items-center mt-5">
-          <span className={darkMode ? "text-gray-300" : "text-gray-700"}>
-            {movie.release_date}
+        <div className="flex justify-between mt-3">
+          <span>{movie.release_date}</span>
+
+          <span className="flex items-center gap-1 text-yellow-400">
+            <FaStar /> {movie.vote_average}
           </span>
+        </div>
 
-          <div className="flex items-center gap-2 text-yellow-400">
-            <FaStar />
+        <div className="flex gap-3 mt-4">
+          <button
+            onClick={() => openEditModal(movie)}
+            className="bg-yellow-500 p-2 rounded"
+          >
+            <FaEdit />
+          </button>
 
-            <span>{movie.vote_average.toFixed(1)}</span>
-          </div>
+          <button
+            onClick={() => deleteMovie(movie.id)}
+            className="bg-red-500 p-2 rounded text-white"
+          >
+            <FaTrash />
+          </button>
         </div>
       </div>
     </div>
