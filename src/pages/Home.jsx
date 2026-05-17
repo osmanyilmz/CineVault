@@ -43,7 +43,12 @@ const Home = () => {
   };
 
   const addMovie = (movie) => {
-    setMovies([{ ...movie, id: Date.now() }, ...movies]);
+    const newMovie = {
+      ...movie,
+      id: Date.now(),
+    };
+
+    setMovies([newMovie, ...movies]);
     setShowModal(false);
   };
 
@@ -52,7 +57,21 @@ const Home = () => {
   };
 
   const updateMovie = (movie) => {
-    setMovies(movies.map((m) => (m.id === movie.id ? movie : m)));
+    setMovies(
+      movies.map((m) =>
+        m.id === movie.id
+          ? {
+              ...m,
+              title: movie.title,
+              overview: movie.overview,
+              poster_path: movie.poster_path,
+              vote_average: movie.vote_average,
+              release_date: movie.release_date,
+            }
+          : m,
+      ),
+    );
+
     setEditingMovie(null);
     setShowModal(false);
   };
@@ -87,7 +106,7 @@ const Home = () => {
 
           <button
             onClick={openAddModal}
-            className="bg-purple-600 px-5 py-3 rounded-xl text-white hover:bg-purple-700"
+            className="bg-purple-600 px-4 py-2 rounded-xl text-white hover:bg-purple-700 whitespace-nowrap"
           >
             Add Movie
           </button>

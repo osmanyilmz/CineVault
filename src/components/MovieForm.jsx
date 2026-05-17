@@ -11,11 +11,18 @@ const MovieForm = ({
   const [overview, setOverview] = useState("");
   const [poster, setPoster] = useState("");
 
+  // FIX: proper sync + reset
   useEffect(() => {
     if (editingMovie) {
       setTitle(editingMovie.title || "");
       setOverview(editingMovie.overview || "");
-      setPoster(editingMovie.poster_path || "");
+      setPoster(
+        editingMovie.poster_path?.startsWith("http")
+          ? editingMovie.poster_path
+          : editingMovie.poster_path
+            ? `https://image.tmdb.org/t/p/w500${editingMovie.poster_path}`
+            : "",
+      );
     } else {
       setTitle("");
       setOverview("");
@@ -45,7 +52,7 @@ const MovieForm = ({
   };
 
   return (
-    <div className="fixed inset-0 bg-black/70 flex items-center justify-center">
+    <div className="fixed inset-0 bg-black/70 flex items-center justify-center z-50">
       <form
         onSubmit={handleSubmit}
         className={
